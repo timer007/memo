@@ -2,103 +2,73 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>5桁ID & メモ管理 (10+10)</title>
+  <title>メモ</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: #e9ecef;
-      color: #333;
-      padding: 6px;
-    }
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 1px; /* 行と行の間を 1px に削る */
-    }
-    .memo-row {
-      display: flex;
-      gap: 4px;
-      background: #fff;
-      padding: 2px 4px; /* 行自体の上下左右の余白を最小限まで削る */
-      align-items: center;
-    }
-    .id-input {
-      width: 75px;
-      height: 28px; /* 入力枠の高さをコンパクト化 */
-      font-size: 0.95rem;
-      font-weight: bold;
-      text-align: center;
-      letter-spacing: 1px;
-      border: 1px solid #ccc;
-      border-radius: 3px;
-      outline: none;
-    }
-    .id-input:focus {
-      border-color: #007bff;
-      background-color: #f0f7ff;
-    }
-    .memo-input {
-      flex: 1;
-      height: 28px; /* 入力枠の高さをコンパクト化 */
-      padding: 0 8px;
-      font-size: 0.9rem;
-      border: 1px solid #ccc;
-      border-radius: 3px;
-      outline: none;
-    }
-    .memo-input:focus {
-      border-color: #007bff;
-      background-color: #f0f7ff;
-    }
+    body { font-family: sans-serif; padding: 15px; background-color: #f4f4f4; }
+    .memo-row { display: flex; gap: 8px; margin-bottom: 8px; }
+    
+    /* 3桁〜5桁用（短い入力欄） */
+    .id-input { width: 75px; padding: 6px; border: 1px solid #ccc; border-radius: 4px; text-align: center; }
+    
+    /* メモ内容用（広い入力欄） */
+    .text-input { flex-grow: 1; padding: 6px; border: 1px solid #ccc; border-radius: 4px; }
+    
+    .save-btn { width: 100%; padding: 10px; font-weight: bold; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; margin-bottom: 15px; }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <div id="list"></div>
-  </div>
+  <button class="save-btn" onclick="saveAllMemos()">すべて保存</button>
+
+  <!-- 20個の枠を配置する場所 -->
+  <div id="memoContainer"></div>
 
   <script>
-    const TOTAL_ROWS = 20; // 10 + 10 = 計20枠
-    const listContainer = document.getElementById('list');
+    const TOTAL_MEMOS = 20;
 
-    for (let i = 0; i < TOTAL_ROWS; i++) {
-      const row = document.createElement('div');
-      row.className = 'memo-row';
+    window.onload = function() {
+      const container = document.getElementById('memoContainer');
+      const savedData = JSON.parse(localStorage.getItem('my_20_memos')) || [];
 
-      // 左側: 5桁入力枠
-      const idInput = document.createElement('input');
-      idInput.type = 'text';
-      idInput.className = 'id-input';
-      idInput.maxLength = 5;
-      idInput.placeholder = '00000';
-      idInput.value = localStorage.getItem(`id_${i}`) || '';
-      idInput.addEventListener('input', (e) => {
-        localStorage.setItem(`id_${i}`, e.target.value);
-      });
+      for (let i = 0; i < TOTAL_MEMOS; i++) {
+        const row = document.createElement('div');
+        row.className = 'memo-row';
+        
+        // ID用入力欄（3〜5桁想定）
+        const idInput = document.createElement('input');
+        idInput.type = 'text';
+        idInput.className = 'id-input';
+        idInput.placeholder = 'ID';
+        idInput.maxLength = 5; // 最大5桁に制限
+        idInput.id = `id_${i}`;
+        idInput.value = savedData[i] ? savedData[i].id : '';
 
-      // 右側: 余白全体を使ったメモ枠
-      const memoInput = document.createElement('input');
-      memoInput.type = 'text';
-      memoInput.className = 'memo-input';
-      memoInput.placeholder = `メモ (${i + 1})`;
-      memoInput.value = localStorage.getItem(`memo_${i}`) || '';
-      memoInput.addEventListener('input', (e) => {
-        localStorage.setItem(`memo_${i}`, e.target.value);
-      });
+        // メモ用入力欄
+        const textInput = document.createElement('input');
+        textInput.type = 'text';
+        textInput.className = 'text-input';
+        textInput.placeholder = 'メモ...';
+        textInput.id = `text_${i}`;
+        textInput.value = savedData[i] ? savedData[i].text : '';
 
-      row.appendChild(idInput);
-      row.appendChild(memoInput);
-      listContainer.appendChild(row);
+        row.appendChild(idInput);
+        row.appendChild(textInput);
+        container.appendChild(row);
+      }
+    };
+
+    function saveAllMemos() {
+      const memoList = [];
+      for (let i = 0; i < TOTAL_MEMOS; i++) {
+        const idVal = document.getElementById(`id_${i}`).value;
+        const textVal = document.getElementById(`text_${i}`).value;
+        memoList.push({ id: idVal, text: textVal });
+      }
+      
+      localStorage.setItem('my_20_memos', JSON.stringify(memoList));
+      alert('保存しました！');
     }
   </script>
+
 </body>
 </html>
