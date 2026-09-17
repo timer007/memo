@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>タイマー付き汎用メモ (20行)</title>
+  <title>タイマー付き汎用メモ (30行)</title>
   <style>
     :root {
       --bg-color: #f4f4f4;
@@ -231,7 +231,7 @@
     <button class="clip-btn" onclick="pasteActiveCell()">ペースト</button>
   </div>
 
-  <!-- 20個のメモ枠 -->
+  <!-- 30個のメモ枠 -->
   <div id="memoContainer"></div>
 
   <!-- 最下段コントロールボタン -->
@@ -278,18 +278,19 @@
       });
     }
 
-    /* アクティブセルのペースト機能 */
-    function pasteActiveCell() {
+    /* アクティブセルのペースト機能（スマホ対応・エラー制御付き） */
+    async function pasteActiveCell() {
       if (!lastActiveInput) {
         alert('貼り付けたい入力欄（ID欄またはメモ欄）をクリックして選択してください。');
         return;
       }
 
-      navigator.clipboard.readText().then(text => {
+      try {
+        const text = await navigator.clipboard.readText();
         lastActiveInput.value = text;
-      }).catch(() => {
-        alert('ペースト権限がないか失敗しました。');
-      });
+      } catch (err) {
+        alert('セキュリティ制限によりボタンでの貼り付けが制限されています。\n入力欄を直接タップ・長押しして「ペースト」を選択してください。');
+      }
     }
 
     /* タイマー処理 */
@@ -379,7 +380,7 @@
       } catch(e) {}
     }
 
-    /* メモ処理 */
+    /* メモ処理 (30行設定) */
     const TOTAL_MEMOS = 30;
 
     window.onload = function() {
